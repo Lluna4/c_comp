@@ -70,6 +70,10 @@ std::vector<struct func> parsee(std::vector<struct token> tokens)
                         }
                     }
                 }
+                if (args.empty())
+                {
+                    args.push_back(kw_argument(0, ""));
+                }
                 struct func function("main", args, "int", kw_return(0));
                 parsed.push_back(function);
             }

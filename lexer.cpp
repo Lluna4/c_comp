@@ -1,7 +1,7 @@
 #include "tokenize.hpp"
 #include <iostream>
 #include <vector>
-#include "parser.hpp"
+#include "code_gen.hpp"
 
 bool var_name = false;
 
@@ -121,4 +121,5 @@ int main(int argc, char *a[])
         std::cout << "   args: "  << "(" << parsed[0].args[0].value << ")" << std::endl;
         std::cout << "   return: type: " << parsed[0].return_type << " value: " << parsed[0].return_thing.return_num << std::endl;
     }
+    code_gen(parsed);
 }
