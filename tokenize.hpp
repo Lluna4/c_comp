@@ -42,7 +42,7 @@ char* ft_strjoin(char const* s1, char const* s2)
 
 bool isNumber(std::string a)
 {
-    if (a.size() > 1)
+    if (a.size() > 1 && isdigit(a.back()) == 0)
         a.pop_back();
     for (int i = 0; i < a.length(); i++)
     {

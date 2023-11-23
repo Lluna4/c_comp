@@ -3,45 +3,16 @@
 #include <vector>
 #include "parser.hpp"
 
-std::vector<struct func> parsee(std::vector<std::string> tokens)
-{
-    std::vector<struct func> parsed;
-    for(int i = 0; i < tokens.size(); i++)
-    {
-        if (tokens[i].compare("int") == 0)
-        {
-            if (tokens[i + 1].compare("main()") == 0)
-            {
-                struct func function("main", std::vector<std::string>(), "int", kw_return(0));
-                parsed.push_back(function);
-            }
-        }
-        if (tokens[i].compare("return") == 0)
-        {
-            if (tokens[i + 1].contains(";"))
-            {
-                tokens[i + 1].pop_back();
-                struct kw_return kw(atoi(tokens[i + 1].c_str()));
-                parsed[0].return_thing = kw;
-            }
-        }
-    }
-    return parsed;
-}
 
 int main(int argc, char *a[])
 {
-    if (argc < 2)
-    {
-        std::cout << "Not enough arguments" << std::endl;
-    }
-    std::ifstream t(a[1]);
+    std::ifstream t("main.c");
     std::stringstream buffer;
     buffer << t.rdbuf();
     std::string b = buffer.str();
     std::vector<std::string> tokens = tokenize(b);
     std::vector<std::string> aaaa;
-    std::vector<int> to;
+    std::vector<struct token> to;
 
     for(int i = 0; i < tokens.size(); i++)
     {
@@ -51,57 +22,71 @@ int main(int argc, char *a[])
     
     for(int i = 0; i < aaaa.size(); i++)
     {   
-
         if (isNumber(aaaa[i]))
         {
-            to.push_back(T_INT_LIT);
+            if (aaaa.size() > 1 && isdigit(aaaa[i].back()) == 0)
+            {
+                if (aaaa[i].back() == ';')
+                {
+                    aaaa[i].pop_back();
+                    to.push_back(token(T_INT_LIT, aaaa[i]));
+                    to.push_back(token(T_SEMICOLON, ";"));
+                }
+            }
+            else
+                to.push_back(token(T_INT_LIT, aaaa[i]));
         }
         if (aaaa[i].compare("int") == 0)
         {
-            to.push_back(T_INT);
+            to.push_back(token(T_INT, aaaa[i]));
         }
         if(aaaa[i].contains("main"))
         {
-            to.push_back(T_MAIN);
+            to.push_back(token(T_MAIN, "main"));
         }
         if(aaaa[i].contains("("))
         {
-            to.push_back(T_OPEN_PARENTESIS);
+            to.push_back(token(T_OPEN_PARENTESIS, "("));
         }
         if(aaaa[i].contains(")"))
         {
-            to.push_back(T_CLOSE_PARENTESIS);
+            to.push_back(token(T_CLOSE_PARENTESIS, ")"));
         }
         if(aaaa[i].contains("{"))
         {
-            to.push_back(T_OPEN_BRACES);
+            to.push_back(token(T_OPEN_BRACES, "{"));
         }
         if(aaaa[i].contains("}"))
         {
-            to.push_back(T_CLOSE_BRACES);
+            to.push_back(token(T_CLOSE_BRACES, "}"));
         }
         if(aaaa[i].contains(";"))
         {
-            to.push_back(T_SEMICOLON);
+            to.push_back(token(T_SEMICOLON, ";"));
         }
-        if(aaaa[i].compare("return") == 0)
+        if(aaaa[i].contains("return"))
         {
-            to.push_back(T_RETURN);
+            to.push_back(token(T_RETURN, "return"));
+        }
+        if (aaaa[i].contains("char"))
+        {
+            to.push_back(token(T_CHAR, "char"));
+            to.push_back(token(T_VAR_NAME, aaaa[i+1]));
         }
     }
 
-    for(int i = 0; i < aaaa.size(); i++)
+    /*
+    for(int i = 0; i < to.size(); i++)
     {
-        std::cout << aaaa[i] << std::endl;
-    }
+        std::cout << to[i].code << std::endl;
+    }*/
 
-    std::vector<struct func> parsed = parsee(aaaa);
+    std::vector<struct func> parsed = parsee(to);
 
     for(int i = 0; i < parsed.size(); i++)
     {
         std::cout << "FUNCTION: " << parsed[0].name << std::endl;
-        std::cout << "   args: "  << "()" << std::endl;
+        std::cout << "   args: "  << "(" << parsed[0].args[0].value << ")" << std::endl;
         std::cout << "   return: type: " << parsed[0].return_type << " value: " << parsed[0].return_thing.return_num << std::endl;
     }
-
 }
