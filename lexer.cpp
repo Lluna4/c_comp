@@ -4,6 +4,8 @@
 #include "code_gen.hpp"
 
 bool var_name = false;
+bool show_lexer = false;
+bool show_parser = false;
 
 std::string containsprotectedchar(std::string str)
 {
@@ -19,7 +21,25 @@ std::string containsprotectedchar(std::string str)
 
 int main(int argc, char *a[])
 {
-    std::ifstream t("main.c");
+    if (argc < 2)
+    {
+        std::cout << "Not enough arguments" << std::endl;
+    }
+    if (argc > 2)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            if (strcmp(a[i], "-l") == 0)
+            {
+                show_lexer = true;
+            }
+            else if (strcmp(a[i], "-p") == 0)
+            {
+                show_parser = true;
+            }
+        }
+    }
+    std::ifstream t(a[1]);
     std::stringstream buffer;
     buffer << t.rdbuf();
     std::string b = buffer.str();
@@ -108,18 +128,26 @@ int main(int argc, char *a[])
         
     }
 
-    for(int i = 0; i < to.size(); i++)
+    if (show_lexer)
     {
-        std::cout << to[i].code << std::endl;
+        for(int i = 0; i < to.size(); i++)
+        {
+            std::cout << to[i].code << std::endl;
+        }
     }
 
     std::vector<struct func> parsed = parsee(to);
 
-    for(int i = 0; i < parsed.size(); i++)
+    if (show_parser)
     {
-        std::cout << "FUNCTION: " << parsed[0].name << std::endl;
-        std::cout << "   args: "  << "(" << parsed[0].args[0].value << ")" << std::endl;
-        std::cout << "   return: type: " << parsed[0].return_type << " value: " << parsed[0].return_thing.return_num << std::endl;
+        for(int i = 0; i < parsed.size(); i++)
+        {
+            std::cout << "FUNCTION: " << parsed[0].name << std::endl;
+            std::cout << "   args: "  << "(" << parsed[0].args[0].value << ")" << std::endl;
+            std::cout << "   return: type: " << parsed[0].return_type << " value: " << parsed[0].return_thing.return_num << std::endl;
+        }
     }
     code_gen(parsed);
+    system("as output.asm -o input.o");
+    system("gcc -o a.out input.o -nostdlib -static");
 }
