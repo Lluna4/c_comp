@@ -3,6 +3,19 @@
 #include <vector>
 #include "parser.hpp"
 
+bool var_name = false;
+
+std::string containsprotectedchar(std::string str)
+{
+    char search = str.back();
+    std::string prot = "{()};";
+    if (prot.find(search) != std::string::npos)
+    {
+        str.pop_back();
+        return str;
+    }
+    return str;
+}
 
 int main(int argc, char *a[])
 {
@@ -24,6 +37,11 @@ int main(int argc, char *a[])
     {   
         if (isNumber(aaaa[i]))
         {
+            if (var_name == true)
+            {
+                std::cout << "ERROR: Number as an argument name";
+                exit(1);
+            }
             if (aaaa.size() > 1 && isdigit(aaaa[i].back()) == 0)
             {
                 if (aaaa[i].back() == ';')
@@ -35,6 +53,20 @@ int main(int argc, char *a[])
             }
             else
                 to.push_back(token(T_INT_LIT, aaaa[i]));
+        }
+        if (var_name == true)
+        {
+            if (aaaa[i].size() == 1)
+            {
+                if (isalnum(aaaa[i][0]) == 0)
+                {
+                    std::cout << "ERROR: The variable name is not alphanumeric" << std::endl;
+                    exit(1);
+                }
+            }
+            std::string ret = containsprotectedchar(aaaa[i]);
+            to.push_back(token(T_VAR_NAME, ret));
+            var_name = false;
         }
         if (aaaa[i].compare("int") == 0)
         {
@@ -71,15 +103,15 @@ int main(int argc, char *a[])
         if (aaaa[i].contains("char"))
         {
             to.push_back(token(T_CHAR, "char"));
-            to.push_back(token(T_VAR_NAME, aaaa[i+1]));
+            var_name = true;
         }
+        
     }
 
-    /*
     for(int i = 0; i < to.size(); i++)
     {
         std::cout << to[i].code << std::endl;
-    }*/
+    }
 
     std::vector<struct func> parsed = parsee(to);
 
