@@ -150,4 +150,5 @@ int main(int argc, char *a[])
     code_gen(parsed);
     system("as output.asm -o input.o");
     system("gcc -o a.out input.o -nostdlib -static");
+    system("rm input.o");
 }
